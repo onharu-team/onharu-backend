@@ -7,6 +7,7 @@ import com.backend.onharu.domain.user.dto.UserCommand.SignUpOwnerCommand;
 import com.backend.onharu.domain.user.dto.UserOAuthCommand.*;
 import com.backend.onharu.domain.user.model.User;
 import com.backend.onharu.infra.security.LocalUser;
+import com.backend.onharu.infra.security.port.ISecuritySession;
 import com.backend.onharu.interfaces.api.common.dto.ResponseDTO;
 import com.backend.onharu.interfaces.api.controller.IUserController;
 import com.backend.onharu.interfaces.api.dto.UserControllerDto.*;
@@ -36,6 +37,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserControllerImpl implements IUserController {
+
+    private final ISecuritySession iSecuritySession;
 
     private final UserFacade userFacade;
 
@@ -198,17 +201,7 @@ public class UserControllerImpl implements IUserController {
                 )
         );
 
-        LocalUser localUser = new LocalUser(user); // UserDetails 구현체 변환
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(localUser, null, localUser.getAuthorities()); // 인증 객체 생성
-
-        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-        securityContext.setAuthentication(usernamePasswordAuthenticationToken); // SecurityContext 에 인증 정보 저장
-
-        httpRequest.getSession(true)
-                .setAttribute(
-                        HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-                        securityContext
-                ); // 세션 생성
+        iSecuritySession.login(user, httpRequest);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDTO.success(null));
@@ -227,12 +220,7 @@ public class UserControllerImpl implements IUserController {
     public ResponseEntity<ResponseDTO<Void>> logout(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         log.info("사용자 로그아웃 요청");
 
-        Authentication authentication = SecurityContextHolder.getContext()
-                .getAuthentication(); // 인증 정보(= 사용자 로그인 상태)
-
-        if (authentication != null) {
-            new SecurityContextLogoutHandler().logout(httpRequest, httpResponse, authentication); // 세션 무효화 및 인증 삭제
-        }
+        iSecuritySession.logout(httpRequest, httpResponse);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDTO.success(null));
