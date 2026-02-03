@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+import com.backend.onharu.domain.level.model.Level;
+import com.backend.onharu.domain.user.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -86,21 +88,29 @@ class StoreTagQueryServiceTest {
                 .name(name)
                 .phone(phone)
                 .userType(UserType.OWNER)
-                .providerType(ProviderType.LOCAL)
                 .statusType(StatusType.ACTIVE)
                 .build()
         );
     }
 
     /**
+     * 테스트용 Level 생성 헬퍼 메서드
+     */
+    private Level createTestLevel(String levelName) {
+        return createTestLevel(levelName);
+    }
+
+    /**
      * 테스트용 Owner 생성 헬퍼 메서드
      */
-    private Owner createTestOwner(String loginId, String name, String phone) {
-        com.backend.onharu.domain.user.model.User user = createTestUser(loginId, name, phone);
+    private Owner createTestOwner(String loginId, String name, String phone, String levelName) {
+        User user = createTestUser(loginId, name, phone);
+        Level level = createTestLevel(levelName);
+
         return ownerJpaRepository.save(
             Owner.builder()
                 .user(user)
-                .levelId(1L)
+                .level(level)
                 .businessNumber("1234567890")
                 .build()
         );
@@ -135,7 +145,7 @@ class StoreTagQueryServiceTest {
         public void shouldGetStoreTags() {
             // given
             String uniqueLoginId = "test_owner_query_" + System.currentTimeMillis();
-            Owner savedOwner = createTestOwner(uniqueLoginId, "테스트 사업자 조회", "01055556666");
+            Owner savedOwner = createTestOwner(uniqueLoginId, "테스트 사업자 조회", "01055556666", "새싹");
             Category category = createTestCategory("식당");
             
             Store savedStore = storeJpaRepository.save(
@@ -190,7 +200,7 @@ class StoreTagQueryServiceTest {
         public void shouldGetEmptyStoreTags() {
             // given
             String uniqueLoginId = "test_owner_empty_" + System.currentTimeMillis();
-            Owner savedOwner = createTestOwner(uniqueLoginId, "테스트 사업자 빈", "01077778888");
+            Owner savedOwner = createTestOwner(uniqueLoginId, "테스트 사업자 빈", "01077778888", "새싹");
             Category category = createTestCategory("식당");
             
             Store savedStore = storeJpaRepository.save(
@@ -228,8 +238,8 @@ class StoreTagQueryServiceTest {
         public void shouldGetStoreTagsFromMultipleStores() {
             // given
             long timestamp = System.currentTimeMillis();
-            Owner savedOwner1 = createTestOwner("test_owner_multi1_" + timestamp, "테스트 사업자 다중1", "01011111111");
-            Owner savedOwner2 = createTestOwner("test_owner_multi2_" + timestamp, "테스트 사업자 다중2", "01022222222");
+            Owner savedOwner1 = createTestOwner("test_owner_multi1_" + timestamp, "테스트 사업자 다중1", "01011111111", "새싹");
+            Owner savedOwner2 = createTestOwner("test_owner_multi2_" + timestamp, "테스트 사업자 다중2", "01022222222", "새싹");
             Category category = createTestCategory("식당");
             
             Tag sharedTag = createTestTag("공통태그");

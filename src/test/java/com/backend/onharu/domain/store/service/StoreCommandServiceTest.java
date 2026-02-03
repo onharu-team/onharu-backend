@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+import com.backend.onharu.domain.level.model.Level;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -85,21 +86,29 @@ class StoreCommandServiceTest {
                 .name(name)
                 .phone(phone)
                 .userType(UserType.OWNER)
-                .providerType(ProviderType.LOCAL)
                 .statusType(StatusType.ACTIVE)
                 .build()
         );
     }
 
     /**
+     * 테스트용 Level 생성 헬퍼 메서드
+     */
+    private Level createTestLevel(String levelName) {
+        return createTestLevel(levelName);
+    }
+
+    /**
      * 테스트용 Owner 생성 헬퍼 메서드 (User와 함께 생성)
      */
-    private Owner createTestOwner(String loginId, String name, String phone, Long levelId, String businessNumber) {
+    private Owner createTestOwner(String loginId, String name, String phone, String levelName, String businessNumber) {
         User user = createTestUser(loginId, name, phone);
+        Level level = createTestLevel(levelName);
+
         return ownerJpaRepository.save(
             Owner.builder()
                 .user(user)
-                .levelId(levelId != null ? levelId : 1L)
+                .level(level)
                 .businessNumber(businessNumber)
                 .build()
         );
@@ -121,7 +130,7 @@ class StoreCommandServiceTest {
         @Rollback(value = false)
         public void shouldCreateStore() {
             // given
-            Owner savedOwner = createTestOwner("test_owner", "테스트 사업자", "01012345678", 1L, "1234567890");
+            Owner savedOwner = createTestOwner("test_owner", "테스트 사업자", "01012345678", "새싹", "1234567890");
             Category category = createTestCategory("식당");
             List<String> tagNames = List.of("테스트 태그1", "테스트 태그2");
             
@@ -178,7 +187,7 @@ class StoreCommandServiceTest {
         @Rollback(value = false)
         public void shouldUpdateStore() {
             // given
-            Owner savedOwner = createTestOwner("test_owner2", "테스트 사업자2", "01087654321", 1L, "0987654321");
+            Owner savedOwner = createTestOwner("test_owner2", "테스트 사업자2", "01087654321", "새싹", "0987654321");
             Category category1 = createTestCategory("식당");
             Category category2 = createTestCategory("카페");
             
@@ -243,7 +252,7 @@ class StoreCommandServiceTest {
         @Rollback(value = false)
         public void shouldChangeOpenStatus() {
             // given
-            Owner savedOwner = createTestOwner("test_owner3", "테스트 사업자3", "01011112222", 1L, "1111222233");
+            Owner savedOwner = createTestOwner("test_owner3", "테스트 사업자3", "01011112222", "새싹", "1111222233");
             Category category = createTestCategory("식당");
             
             // 기존 가게 생성

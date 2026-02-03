@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import com.backend.onharu.domain.level.model.Level;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -73,21 +74,29 @@ class StoreScheduleQueryServiceTest {
                 .name(name)
                 .phone(phone)
                 .userType(UserType.OWNER)
-                .providerType(ProviderType.LOCAL)
                 .statusType(StatusType.ACTIVE)
                 .build()
         );
     }
 
     /**
+     * 테스트용 Level 생성 헬퍼 메서드
+     */
+    private Level createTestLevel(String levelName) {
+        return createTestLevel(levelName);
+    }
+
+    /**
      * 테스트용 Owner 생성 헬퍼 메서드 (User와 함께 생성)
      */
-    private Owner createTestOwner(String loginId, String name, String phone, Long levelId, String businessNumber) {
+    private Owner createTestOwner(String loginId, String name, String phone, String levelName, String businessNumber) {
         User user = createTestUser(loginId, name, phone);
+        Level level = createTestLevel(levelName);
+
         return ownerJpaRepository.save(
             Owner.builder()
                 .user(user)
-                .levelId(levelId != null ? levelId : 1L)
+                .level(level)
                 .businessNumber(businessNumber)
                 .build()
         );
@@ -124,7 +133,7 @@ class StoreScheduleQueryServiceTest {
         @Rollback(value = false)
         public void shouldGetStoreScheduleById() {
             // given
-            Owner savedOwner = createTestOwner("test_owner_query_schedule", "테스트 사업자 조회 일정", "01055556666", 1L, "5555666677");
+            Owner savedOwner = createTestOwner("test_owner_query_schedule", "테스트 사업자 조회 일정", "01055556666", "새싹", "5555666677");
             Category category = createTestCategory("식당");
             Store savedStore = createTestStore("조회 테스트 가게", savedOwner, category);
             
@@ -174,7 +183,7 @@ class StoreScheduleQueryServiceTest {
                 "test_owner_list_schedule", 
                 "테스트 사업자 목록 일정", 
                 "01077778888", 
-                1L, 
+                "새싹",
                 "7777888899"
             ); // 테스트용 사업자 생성
             Category category = createTestCategory("식당"); // 테스트용 카테고리 생성
@@ -208,8 +217,8 @@ class StoreScheduleQueryServiceTest {
         @Rollback(value = false)
         public void shouldGetStoreSchedulesByBusinessDay() {
             // given
-            Owner savedOwner1 = createTestOwner("test_owner_date1", "테스트 사업자 날짜1", "01011111111", 1L, "1111111111");
-            Owner savedOwner2 = createTestOwner("test_owner_date2", "테스트 사업자 날짜2", "01022222222", 1L, "2222222222");
+            Owner savedOwner1 = createTestOwner("test_owner_date1", "테스트 사업자 날짜1", "01011111111", "새싹", "1111111111");
+            Owner savedOwner2 = createTestOwner("test_owner_date2", "테스트 사업자 날짜2", "01022222222", "새싹", "2222222222");
             
             Category category = createTestCategory("식당");
             Store savedStore1 = createTestStore("날짜 테스트 가게 1", savedOwner1, category);

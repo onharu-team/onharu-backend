@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import com.backend.onharu.domain.level.model.Level;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -90,7 +91,6 @@ class ReservationCommandServiceTest {
                 .password("password123")
                 .name(name)
                 .phone(phone)
-                .providerType(ProviderType.LOCAL)
                 .userType(UserType.CHILD)
                 .statusType(StatusType.ACTIVE)
                 .build()
@@ -119,24 +119,32 @@ class ReservationCommandServiceTest {
     }
 
     /**
+     * 테스트용 Level 생성 헬퍼 메서드
+     */
+    private Level createTestLevel(String levelName) {
+        return createTestLevel(levelName);
+    }
+
+    /**
      * 테스트용 Owner 생성 헬퍼 메서드 (User와 함께 생성)
      */
-    private Owner createTestOwner(String loginId, String name, String phone, Long levelId, String businessNumber) {
+    private Owner createTestOwner(String loginId, String name, String phone, String levelName, String businessNumber) {
         User user = userJpaRepository.save(
             User.builder()
                 .loginId(loginId)
                 .password("password123")
                 .name(name)
                 .phone(phone)
-                .providerType(ProviderType.LOCAL)
                 .userType(UserType.OWNER)
                 .statusType(StatusType.ACTIVE)
                 .build()
         );
+        Level level = createTestLevel(levelName);
+
         return ownerJpaRepository.save(
             Owner.builder()
                 .user(user)
-                .levelId(levelId != null ? levelId : 1L)
+                .level(level)
                 .businessNumber(businessNumber)
                 .build()
         );
@@ -174,8 +182,8 @@ class ReservationCommandServiceTest {
         public void shouldCreateReservation() {
             // given
             Child savedChild = createTestChild("test_child", "테스트 아동", "01012345678");
-            
-            Owner savedOwner = createTestOwner("test_owner", "테스트 사업자", "01011112222", 1L, "1234567890");
+            Level level = createTestLevel("새싹");
+            Owner savedOwner = createTestOwner("test_owner", "테스트 사업자", "01011112222", "새싹", "1234567890");
             Category category = createTestCategory("식당");
             Store savedStore = createTestStore("테스트 가게", savedOwner, category);
             StoreSchedule saveDummyStoreSchedules = saveDummyStoreSchedules(savedStore, 10, 11);
@@ -183,7 +191,7 @@ class ReservationCommandServiceTest {
 
             // when
             Reservation reservation = reservationCommandService.createReservation(
-                new CreateReservationCommand(savedChild.getId(), saveDummyStoreSchedules.getId(), people),
+                new CreateReservationCommand(saveDummyStoreSchedules.getId(), people),
                 saveDummyStoreSchedules,
                 savedChild
             );
@@ -220,8 +228,8 @@ class ReservationCommandServiceTest {
         public void shouldCancelReservation() {
             // given
             Child savedChild = createTestChild("test_child2", "테스트 아동2", "01087654321", "/certificates/test2.pdf", true);
-            
-            Owner savedOwner = createTestOwner("test_owner2", "테스트 사업자2", "01022223333", 1L, "2234567890");
+            Level level = createTestLevel("새싹");
+            Owner savedOwner = createTestOwner("test_owner2", "테스트 사업자2", "01022223333", "새싹", "2234567890");
             Category category = createTestCategory("식당");
             Store savedStore = createTestStore("테스트 가게2", savedOwner, category);
             StoreSchedule saveDummyStoreSchedules = saveDummyStoreSchedules(savedStore, 10, 11);
@@ -265,8 +273,8 @@ class ReservationCommandServiceTest {
         public void shouldCompleteReservation() {
             // given
             Child savedChild = createTestChild("test_child3", "테스트 아동3", "01011112222", "/certificates/test3.pdf", true);
-            
-            Owner savedOwner = createTestOwner("test_owner3", "테스트 사업자3", "01033334444", 1L, "3334567890");
+            Level level = createTestLevel("새싹");
+            Owner savedOwner = createTestOwner("test_owner3", "테스트 사업자3", "01033334444", "새싹", "3334567890");
             Category category = createTestCategory("식당");
             Store savedStore = createTestStore("테스트 가게3", savedOwner, category);
             StoreSchedule saveDummyStoreSchedules = saveDummyStoreSchedules(savedStore, 10, 11);
@@ -306,8 +314,8 @@ class ReservationCommandServiceTest {
         public void shouldChangeReservationStatus() {
             // given
             Child savedChild = createTestChild("test_child4", "테스트 아동4", "01033334444", "/certificates/test4.pdf", true);
-            
-            Owner savedOwner = createTestOwner("test_owner4", "테스트 사업자4", "01044445555", 1L, "4444567890");
+            Level level = createTestLevel("새싹");
+            Owner savedOwner = createTestOwner("test_owner4", "테스트 사업자4", "01044445555", "새싹", "4444567890");
             Category category = createTestCategory("식당");
             Store savedStore = createTestStore("테스트 가게4", savedOwner, category);
             StoreSchedule saveDummyStoreSchedules = saveDummyStoreSchedules(savedStore, 10, 11);

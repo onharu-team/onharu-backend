@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.UUID;
 
+import com.backend.onharu.domain.level.model.Level;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -78,21 +79,30 @@ class StoreFacadeTest {
                 .name(name)
                 .phone(phone)
                 .userType(UserType.OWNER)
-                .providerType(ProviderType.LOCAL)
                 .statusType(StatusType.ACTIVE)
                 .build()
         );
     }
 
+
+    /**
+     * 테스트용 Level 생성 헬퍼 메서드
+     */
+    private Level createTestLevel(String levelName) {
+        return createTestLevel(levelName);
+    }
+
     /**
      * 테스트용 Owner 생성 헬퍼 메서드 (User와 함께 생성)
      */
-    private Owner createTestOwner(String loginId, String name, String phone, Long levelId, String businessNumber) {
+    private Owner createTestOwner(String loginId, String name, String phone, String levelName, String businessNumber) {
         User user = createTestUserForOwner(loginId, name, phone);
+        Level level = createTestLevel(levelName);
+
         return ownerJpaRepository.save(
             Owner.builder()
                 .user(user)
-                .levelId(levelId != null ? levelId : 1L)
+                .level(level)
                 .businessNumber(businessNumber)
                 .build()
         );
@@ -129,7 +139,8 @@ class StoreFacadeTest {
         @Rollback(value = false)
         public void shouldGetStore() {
             // given
-            Owner owner = createTestOwner("test_owner_get_store", "테스트 사업자", "01012345678", 1L, "1234567890");
+            Level level = createTestLevel("새싹");
+            Owner owner = createTestOwner("test_owner_get_store", "테스트 사업자", "01012345678", "새싹", "1234567890");
             Category category = createTestCategory("식당");
             Store store = createTestStore("테스트 가게", owner, category);
 
@@ -158,7 +169,8 @@ class StoreFacadeTest {
         @Rollback(value = false)
         public void shouldGetStores() {
             // given
-            Owner owner = createTestOwner("test_owner_get_stores", "테스트 사업자", "01012345678", 1L, "1234567890");
+            Level level = createTestLevel("새싹");
+            Owner owner = createTestOwner("test_owner_get_stores", "테스트 사업자", "01012345678", "새싹", "1234567890");
             Category category = createTestCategory("식당");
             Store store1 = createTestStore("테스트 가게1", owner, category);
             Store store2 = createTestStore("테스트 가게2", owner, category);
@@ -181,7 +193,8 @@ class StoreFacadeTest {
         @DisplayName("가게가 없을 때 빈 목록 반환")
         public void shouldReturnEmptyListWhenNoStores() {
             // given
-            Owner owner = createTestOwner("test_owner_empty_stores", "테스트 사업자", "01012345678", 1L, "1234567890");
+            Level level = createTestLevel("새싹");
+            Owner owner = createTestOwner("test_owner_empty_stores", "테스트 사업자", "01012345678", "새싹", "1234567890");
 
             // when
             List<Store> stores = storeFacade.getStores(owner.getId());
@@ -202,7 +215,8 @@ class StoreFacadeTest {
         public void shouldCreateStore() {
             // given
             String uniqueLoginId = "test_owner_create_" + UUID.randomUUID().toString().substring(0, 8);
-            Owner owner = createTestOwner(uniqueLoginId, "테스트 사업자", "01012345678", 1L, "1234567890");
+            Level level = createTestLevel("새싹");
+            Owner owner = createTestOwner(uniqueLoginId, "테스트 사업자", "01012345678", "새싹", "1234567890");
             Category category = createTestCategory("식당");
             
             CreateStoreCommand command = new CreateStoreCommand(
@@ -246,7 +260,8 @@ class StoreFacadeTest {
         public void shouldCreateStoreWithTags() {
             // given
             String uniqueLoginId = "test_owner_tags_" + UUID.randomUUID().toString().substring(0, 8);
-            Owner owner = createTestOwner(uniqueLoginId, "테스트 사업자", "01012345678", 1L, "1234567890");
+            Level level = createTestLevel("새싹");
+            Owner owner = createTestOwner(uniqueLoginId, "테스트 사업자", "01012345678", "새싹", "1234567890");
             Category category = createTestCategory("식당");
             
             CreateStoreCommand command = new CreateStoreCommand(
@@ -302,7 +317,8 @@ class StoreFacadeTest {
         public void shouldCreateStoreWithExistingTags() {
             // given
             String uniqueLoginId = "test_owner_reuse_" + UUID.randomUUID().toString().substring(0, 8);
-            Owner owner = createTestOwner(uniqueLoginId, "테스트 사업자", "01012345678", 1L, "1234567890");
+            Level level = createTestLevel("새싹");
+            Owner owner = createTestOwner(uniqueLoginId, "테스트 사업자", "01012345678", "새싹", "1234567890");
             Category category = createTestCategory("식당");
             
             // 기존 태그 생성
@@ -377,7 +393,8 @@ class StoreFacadeTest {
         public void shouldUpdateStore() {
             // given
             String uniqueLoginId = "owner_" + UUID.randomUUID().toString().substring(0, 8);
-            Owner owner = createTestOwner(uniqueLoginId, "테스트 사업자", "01012345678", 1L, "1234567890");
+            Level level = createTestLevel("새싹");
+            Owner owner = createTestOwner(uniqueLoginId, "테스트 사업자", "01012345678", "새싹", "1234567890");
             Category category1 = createTestCategory("식당");
             Category category2 = createTestCategory("카페");
             Store store = createTestStore("테스트 가게", owner, category1);
@@ -423,8 +440,9 @@ class StoreFacadeTest {
             // given
             String uniqueLoginId1 = "owner_" + UUID.randomUUID().toString().substring(0, 8);
             String uniqueLoginId2 = "owner_" + UUID.randomUUID().toString().substring(0, 8);
-            Owner owner1 = createTestOwner(uniqueLoginId1, "테스트 사업자1", "01012345678", 1L, "1234567890");
-            Owner owner2 = createTestOwner(uniqueLoginId2, "테스트 사업자2", "01087654321", 1L, "2234567890");
+            Level level = createTestLevel("새싹");
+            Owner owner1 = createTestOwner(uniqueLoginId1, "테스트 사업자1", "01012345678", "새싹", "1234567890");
+            Owner owner2 = createTestOwner(uniqueLoginId2, "테스트 사업자2", "01087654321", "새싹", "2234567890");
             Category category = createTestCategory("식당");
             Store store = createTestStore("테스트 가게", owner1, category);
             
@@ -463,7 +481,8 @@ class StoreFacadeTest {
         public void shouldUpdateCategory() {
             // given
             String uniqueLoginId1 = "owner_" + UUID.randomUUID().toString().substring(0, 8);
-            Owner owner = createTestOwner(uniqueLoginId1, "테스트 사업자", "01012345678", 1L, "1234567890");
+            Level level = createTestLevel("새싹");
+            Owner owner = createTestOwner(uniqueLoginId1, "테스트 사업자", "01012345678", "새싹", "1234567890");
             Category category1 = createTestCategory("식당");
             Category category2 = createTestCategory("카페");
             Store store = createTestStore("테스트 가게", owner, category1);
@@ -489,8 +508,9 @@ class StoreFacadeTest {
             // given
             String uniqueLoginId1 = "owner_" + UUID.randomUUID().toString().substring(0, 8);
             String uniqueLoginId2 = "owner_" + UUID.randomUUID().toString().substring(0, 8);
-            Owner owner1 = createTestOwner(uniqueLoginId1, "테스트 사업자1", "01012345678", 1L, "1234567890");
-            Owner owner2 = createTestOwner(uniqueLoginId2, "테스트 사업자2", "01087654321", 1L, "2234567890");
+            Level level = createTestLevel("새싹");
+            Owner owner1 = createTestOwner(uniqueLoginId1, "테스트 사업자1", "01012345678", "새싹", "1234567890");
+            Owner owner2 = createTestOwner(uniqueLoginId2, "테스트 사업자2", "01087654321", "새싹", "2234567890");
             Category category1 = createTestCategory("식당");
             Category category2 = createTestCategory("카페");
             Store store = createTestStore("테스트 가게", owner1, category1);
@@ -514,7 +534,8 @@ class StoreFacadeTest {
         @Rollback(value = false)
         public void shouldDeleteStore() {
             // given
-            Owner owner = createTestOwner("test_owner_delete_store", "테스트 사업자", "01012345678", 1L, "1234567890");
+            Level level = createTestLevel("새싹");
+            Owner owner = createTestOwner("test_owner_delete_store", "테스트 사업자", "01012345678", "새싹", "1234567890");
             Category category = createTestCategory("식당");
             Store store = createTestStore("테스트 가게", owner, category);
 
@@ -533,8 +554,9 @@ class StoreFacadeTest {
         @DisplayName("다른 사업자의 가게 삭제 시 예외 발생")
         public void shouldThrowExceptionWhenStoreBelongsToOtherOwner() {
             // given
-            Owner owner1 = createTestOwner("test_owner1_delete", "테스트 사업자1", "01012345678", 1L, "1234567890");
-            Owner owner2 = createTestOwner("test_owner2_delete", "테스트 사업자2", "01087654321", 1L, "2234567890");
+            Level level = createTestLevel("새싹");
+            Owner owner1 = createTestOwner("test_owner1_delete", "테스트 사업자1", "01012345678", "새싹", "1234567890");
+            Owner owner2 = createTestOwner("test_owner2_delete", "테스트 사업자2", "01087654321", "새싹", "2234567890");
             Category category = createTestCategory("식당");
             Store store = createTestStore("테스트 가게", owner1, category);
 
@@ -557,7 +579,8 @@ class StoreFacadeTest {
         @Rollback(value = false)
         public void shouldChangeOpenStatusToOpen() {
             // given
-            Owner owner = createTestOwner("test_owner_change_status", "테스트 사업자", "01012345678", 1L, "1234567890");
+            Level level = createTestLevel("새싹");
+            Owner owner = createTestOwner("test_owner_change_status", "테스트 사업자", "01012345678", "새싹", "1234567890");
             Category category = createTestCategory("식당");
             Store store = createTestStore("테스트 가게", owner, category);
             // 초기 상태를 false로 설정
@@ -582,7 +605,8 @@ class StoreFacadeTest {
         @Rollback(value = false)
         public void shouldChangeOpenStatusToClosed() {
             // given
-            Owner owner = createTestOwner("test_owner_change_status_closed", "테스트 사업자", "01012345678", 1L, "1234567890");
+            Level level = createTestLevel("새싹");
+            Owner owner = createTestOwner("test_owner_change_status_closed", "테스트 사업자", "01012345678", "새싹", "1234567890");
             Category category = createTestCategory("식당");
             Store store = createTestStore("테스트 가게", owner, category);
             // 초기 상태를 true로 설정
@@ -606,8 +630,9 @@ class StoreFacadeTest {
         @DisplayName("다른 사업자의 가게 영업 상태 변경 시 예외 발생")
         public void shouldThrowExceptionWhenStoreBelongsToOtherOwner() {
             // given
-            Owner owner1 = createTestOwner("test_owner1_status", "테스트 사업자1", "01012345678", 1L, "1234567890");
-            Owner owner2 = createTestOwner("test_owner2_status", "테스트 사업자2", "01087654321", 1L, "2234567890");
+            Level level = createTestLevel("새싹");
+            Owner owner1 = createTestOwner("test_owner1_status", "테스트 사업자1", "01012345678", "새싹", "1234567890");
+            Owner owner2 = createTestOwner("test_owner2_status", "테스트 사업자2", "01087654321", "새싹", "2234567890");
             Category category = createTestCategory("식당");
             Store store = createTestStore("테스트 가게", owner1, category);
 
