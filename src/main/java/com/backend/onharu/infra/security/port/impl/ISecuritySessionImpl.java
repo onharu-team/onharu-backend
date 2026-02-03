@@ -40,4 +40,12 @@ public class ISecuritySessionImpl implements ISecuritySession {
             new SecurityContextLogoutHandler().logout(httpRequest, httpResponse, authentication); // 세션 무효화 및 인증 삭제
         }
     }
+
+    @Override
+    public Long getUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        LocalUser localUser = (LocalUser) authentication.getPrincipal();
+
+        return Long.valueOf(localUser.getUsername());
+    }
 }

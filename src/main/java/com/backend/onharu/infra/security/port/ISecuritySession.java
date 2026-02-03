@@ -12,4 +12,6 @@ public interface ISecuritySession {
     void login(User user, HttpServletRequest httpRequest);
 
     void logout(HttpServletRequest httpRequest, HttpServletResponse httpResponse);
+
+    Long getUsername();
 }
