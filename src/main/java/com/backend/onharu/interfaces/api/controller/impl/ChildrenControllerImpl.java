@@ -1,41 +1,21 @@
 package com.backend.onharu.interfaces.api.controller.impl;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.backend.onharu.application.ChildFacade;
 import com.backend.onharu.domain.reservation.dto.ReservationCommand.CancelReservationCommand;
 import com.backend.onharu.domain.reservation.dto.ReservationCommand.CreateReservationCommand;
 import com.backend.onharu.domain.reservation.model.Reservation;
 import com.backend.onharu.interfaces.api.common.dto.ResponseDTO;
 import com.backend.onharu.interfaces.api.controller.IChildrenController;
-import com.backend.onharu.interfaces.api.dto.ChildControllerDto.BookStoreRequest;
-import com.backend.onharu.interfaces.api.dto.ChildControllerDto.BookStoreResponse;
-import com.backend.onharu.interfaces.api.dto.ChildControllerDto.GetCardResponse;
-import com.backend.onharu.interfaces.api.dto.ChildControllerDto.GetCertificateResponse;
-import com.backend.onharu.interfaces.api.dto.ChildControllerDto.GetMyBookingDetailResponse;
-import com.backend.onharu.interfaces.api.dto.ChildControllerDto.GetMyBookingListResponse;
-import com.backend.onharu.interfaces.api.dto.ChildControllerDto.IssueCardRequest;
-import com.backend.onharu.interfaces.api.dto.ChildControllerDto.IssueCardResponse;
-import com.backend.onharu.interfaces.api.dto.ChildControllerDto.ReservationResponse;
-import com.backend.onharu.interfaces.api.dto.ChildControllerDto.UpdateCardRequest;
-import com.backend.onharu.interfaces.api.dto.ChildControllerDto.UpdateCertificateRequest;
-
+import com.backend.onharu.interfaces.api.dto.ChildControllerDto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 결식 아동 관련 API를 제공하는 컨트롤러 구현체입니다.
@@ -256,9 +236,8 @@ public class ChildrenControllerImpl implements IChildrenController {
             @RequestBody BookStoreRequest request
     ) {
         log.info("예약 생성 요청: storeId={}, request={}", storeId, request);
-        Long childId = 319L; // TODO: 아동 ID SecurityContext에서 가져오기
 
-        childFacade.reserve(new CreateReservationCommand(childId, request.storeScheduleId(), request.people()));
+        childFacade.reserve(new CreateReservationCommand(request.storeScheduleId(), request.people()));
         
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ResponseDTO.success(null));
@@ -280,9 +259,7 @@ public class ChildrenControllerImpl implements IChildrenController {
     ) {
         log.info("예약 취소 요청: reservationId={}", reservationId);
 
-        Long childId = 319L; // TODO: 아동 ID SecurityContext에서 가져오기
-
-        childFacade.cancelReservation(new CancelReservationCommand(reservationId, "예약 취소"), childId);
+        childFacade.cancelReservation(new CancelReservationCommand(reservationId, "예약 취소"));
         
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDTO.success(null));
@@ -301,9 +278,7 @@ public class ChildrenControllerImpl implements IChildrenController {
     public ResponseEntity<ResponseDTO<GetMyBookingListResponse>> getMyBookings() {
         log.info("예약 신청 목록 조회 요청");
 
-        Long childId = 319L; // TODO: 아동 ID SecurityContext에서 가져오기
-
-        List<Reservation> reservations = childFacade.getMyBookings(childId); // 내 예약 목록 조회
+        List<Reservation> reservations = childFacade.getMyBookings(); // 내 예약 목록 조회
         List<ReservationResponse> reservationResponses = reservations.stream()
                 .map(ReservationResponse::new)
                 .collect(Collectors.toList());
@@ -329,9 +304,8 @@ public class ChildrenControllerImpl implements IChildrenController {
             @PathVariable("reservationId") Long reservationId
     ) {
         log.info("예약 신청 상세 조회 요청: reservationId={}", reservationId);
-        Long childId = 319L; // TODO: 아동 ID SecurityContext에서 가져오기
 
-        Reservation reservation = childFacade.getMyBooking(reservationId, childId);
+        Reservation reservation = childFacade.getMyBooking(reservationId);
         ReservationResponse reservationResponse = new ReservationResponse(reservation);
 
         GetMyBookingDetailResponse response = new GetMyBookingDetailResponse(reservationResponse);
