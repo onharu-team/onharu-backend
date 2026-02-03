@@ -144,7 +144,6 @@ public class OwnerControllerImpl implements IOwnerController {
      * GET /owners/stores
      * 사업자의 가게 목록을 조회합니다.
      *
-     * @param ownerId 사업자 ID
      * @return 사업자 가게 목록
      */
     @Override
@@ -152,9 +151,7 @@ public class OwnerControllerImpl implements IOwnerController {
     public ResponseEntity<ResponseDTO<GetMyStoresResponse>> getMyStores() {
         log.info("사업자 가게 목록 조회 요청");
 
-        Long ownerId = 855L; // TODO: 사업자 ID SecurityContext에서 가져오기
-
-        List<Store> stores = ownerFacade.getMyStores(ownerId);
+        List<Store> stores = ownerFacade.getMyStores();
         List<StoreResponse> storeResponses = stores.stream()
                 .map(StoreResponse::new)
                 .collect(Collectors.toList());
@@ -179,9 +176,7 @@ public class OwnerControllerImpl implements IOwnerController {
             @PathVariable("storeId") Long storeId
     ) {
         log.info("예약 관리 목록 조회 요청");
-        Long ownerId = 855L; // TODO: 사업자 ID SecurityContext에서 가져오기
-
-        List<Reservation> reservations = ownerFacade.getStoreBookings(ownerId, storeId); // 가게의 예약 목록 조회
+        List<Reservation> reservations = ownerFacade.getStoreBookings(storeId); // 가게의 예약 목록 조회
         List<ReservationResponse> reservationResponses = reservations.stream()
                 .map(ReservationResponse::new)
                 .collect(Collectors.toList());
@@ -231,9 +226,8 @@ public class OwnerControllerImpl implements IOwnerController {
             @PathVariable("reservationId") Long reservationId
     ) {
         log.info("예약 승인 요청: reservationId={}", reservationId);
-        Long ownerId = 855L; // TODO: 사업자 ID SecurityContext에서 가져오기
 
-        ownerFacade.approveReservation(reservationId, ownerId);
+        ownerFacade.approveReservation(reservationId);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDTO.success(null));
@@ -279,9 +273,8 @@ public class OwnerControllerImpl implements IOwnerController {
             @RequestBody SetAvailableDatesRequest request
     ) {
         log.info("예약 가능한 날짜 생성 요청: storeId={}, request={}", storeId, request);
-        Long ownerId = 855L; // TODO: 사업자 ID SecurityContext에서 가져오기
 
-        ownerFacade.setAvailableDates(storeId, ownerId, request);
+        ownerFacade.setAvailableDates(storeId, request);
         
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ResponseDTO.success(null));
@@ -304,9 +297,8 @@ public class OwnerControllerImpl implements IOwnerController {
             @RequestBody UpdateAvailableDatesRequest request
     ) {
         log.info("예약 가능한 날짜 수정 요청: storeId={}, request={}", storeId, request);
-        Long ownerId = 855L; // TODO: 사업자 ID SecurityContext에서 가져오기
 
-        ownerFacade.updateAvailableDates(storeId, ownerId, request);
+        ownerFacade.updateAvailableDates(storeId, request);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDTO.success(null));
@@ -329,9 +321,8 @@ public class OwnerControllerImpl implements IOwnerController {
             @RequestBody RemoveAvailableDatesRequest request
     ) {
         log.info("예약 가능한 날짜 삭제 요청: storeId={}, request={}", storeId, request);
-        Long ownerId = 855L; // TODO: 사업자 ID SecurityContext에서 가져오기
 
-        ownerFacade.removeAvailableDates(storeId, ownerId, request);
+        ownerFacade.removeAvailableDates(storeId, request);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDTO.success(null));

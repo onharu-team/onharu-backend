@@ -4,11 +4,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.backend.onharu.infra.security.port.ISecuritySession;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.backend.onharu.application.validator.StoreScheduleValidator;
 import com.backend.onharu.application.validator.StoreScheduleValidator.ScheduleTimeRange;
+import com.backend.onharu.domain.owner.dto.OwnerQuery.GetOwnerByUserIdQuery;
 import com.backend.onharu.domain.owner.dto.OwnerQuery.GetOwnerByIdQuery;
 import com.backend.onharu.domain.owner.model.Owner;
 import com.backend.onharu.domain.owner.service.OwnerQueryService;
@@ -53,18 +55,22 @@ public class OwnerFacade {
     private final StoreScheduleCommandService storeScheduleCommandService;
     private final StoreScheduleValidator storeScheduleValidator;
 
+    private final ISecuritySession iSecuritySession;
+
     /**
      * 사업자의 가게 목록 조회
-     * 
-     * @param ownerId 사업자 ID
+     *
      * @return 사업자의 가게 목록
      */
-    public List<Store> getMyStores(Long ownerId) {
+    public List<Store> getMyStores() {
+        // SecurityContext 에서 사용자 ID 획득
+        Long userId = iSecuritySession.getUsername();
+
         // 사업자 정보 조회 (존재 여부 확인)
-        Owner owner = ownerQueryService.getOwnerById(new GetOwnerByIdQuery(ownerId));
+        Owner owner = ownerQueryService.getOwnerByUserId(new GetOwnerByUserIdQuery(userId));
 
         // 사업자의 가게 목록 조회
-        List<Store> stores = storeQueryService.findByOwnerId(new FindByOwnerIdQuery(ownerId));
+        List<Store> stores = storeQueryService.findByOwnerId(new FindByOwnerIdQuery(owner.getId()));
 
         // 각 가게가 해당 사업자의 소유인지 검증
         stores.forEach(store -> store.BelongsTo(owner));
@@ -94,14 +100,16 @@ public class OwnerFacade {
 
     /**
      * 사업자 가게의 예약 목록 조회
-     * 
-     * @param owenrId 사업자 ID
+     *
      * @param storeId 가게 ID
      * @return 사업자의 예약 목록
      */
-    public List<Reservation> getStoreBookings(Long owenrId, Long storeId) {
+    public List<Reservation> getStoreBookings(Long storeId) {
+        // SecurityContext 에서 사용자 ID 획득
+        Long userId = iSecuritySession.getUsername();
+
         // 사업자 정보 조회
-        Owner owner = ownerQueryService.getOwnerById(new GetOwnerByIdQuery(owenrId));
+        Owner owner = ownerQueryService.getOwnerByUserId(new GetOwnerByUserIdQuery(userId));
 
         // 가게 정보 조회
         Store store = storeQueryService.getStore(new GetStoreByIdQuery(storeId));
@@ -136,12 +144,15 @@ public class OwnerFacade {
      * @param request 예약 가능한 날짜 생성 요청
      */
     @Transactional
-    public void setAvailableDates(Long storeId, Long ownerId, SetAvailableDatesRequest request) {
+    public void setAvailableDates(Long storeId, SetAvailableDatesRequest request) {
         // 가게 정보 조회
         Store store = storeQueryService.getStore(new GetStoreByIdQuery(storeId));
 
-        // 사업자 정보 조회
-        Owner owner = ownerQueryService.getOwnerById(new GetOwnerByIdQuery(ownerId));
+        // SecurityContext 에서 사용자 ID 획득
+        Long userId = iSecuritySession.getUsername();
+
+        // 사업자 정보 조회 (존재 여부 확인)
+        Owner owner = ownerQueryService.getOwnerByUserId(new GetOwnerByUserIdQuery(userId));
 
         // 사업자가 가게의 주인인지 확인
         store.BelongsTo(owner);
@@ -174,16 +185,18 @@ public class OwnerFacade {
      * 예약 가능한 날짜 수정
      * 
      * @param storeId 가게 ID
-     * @param ownerId 사업자 ID
      * @param request 예약 가능한 날짜 수정 요청
      */
     @Transactional
-    public void updateAvailableDates(Long storeId, Long ownerId, UpdateAvailableDatesRequest request) {
+    public void updateAvailableDates(Long storeId, UpdateAvailableDatesRequest request) {
         // 가게 정보 조회
         Store store = storeQueryService.getStore(new GetStoreByIdQuery(storeId));
 
-        // 사업자 정보 조회
-        Owner owner = ownerQueryService.getOwnerById(new GetOwnerByIdQuery(ownerId));
+        // SecurityContext 에서 사용자 ID 획득
+        Long userId = iSecuritySession.getUsername();
+
+        // 사업자 정보 조회 (존재 여부 확인)
+        Owner owner = ownerQueryService.getOwnerByUserId(new GetOwnerByUserIdQuery(userId));
 
         // 사업자가 가게의 주인인지 확인
         store.BelongsTo(owner);
@@ -231,12 +244,15 @@ public class OwnerFacade {
      * @param storeId 가게 ID
      * @param request 예약 가능한 날짜 삭제 요청
      */
-    public void removeAvailableDates(Long storeId, Long ownerId, RemoveAvailableDatesRequest request) {
+    public void removeAvailableDates(Long storeId, RemoveAvailableDatesRequest request) {
         // 가게 정보 조회
         Store store = storeQueryService.getStore(new GetStoreByIdQuery(storeId));
 
-        // 사업자 정보 조회
-        Owner owner = ownerQueryService.getOwnerById(new GetOwnerByIdQuery(ownerId));
+        // SecurityContext 에서 사용자 ID 획득
+        Long userId = iSecuritySession.getUsername();
+
+        // 사업자 정보 조회 (존재 여부 확인)
+        Owner owner = ownerQueryService.getOwnerByUserId(new GetOwnerByUserIdQuery(userId));
 
         // 사업자가 가게의 주인인지 확인
         store.BelongsTo(owner);
@@ -257,15 +273,18 @@ public class OwnerFacade {
      * 
      * @param reservationId 예약 ID
      */
-    public void approveReservation(Long reservationId, Long ownerId) {
+    public void approveReservation(Long reservationId) {
         // 예약 정보 조회
         Reservation reservation = reservationQueryService.getReservation(new GetReservationByIdQuery(reservationId));
 
         // Store 조회
         Store store = storeQueryService.getStore(new GetStoreByIdQuery(reservation.getStoreSchedule().getStore().getId()));
 
+        // SecurityContext 에서 사용자 ID 획득
+        Long userId = iSecuritySession.getUsername();
+
         // Owner 조회
-        Owner owner = ownerQueryService.getOwnerById(new GetOwnerByIdQuery(ownerId));
+        Owner owner = ownerQueryService.getOwnerByUserId(new GetOwnerByUserIdQuery(userId));
 
         // 사업자가 가게의 주인인지 확인
         store.BelongsTo(owner);
