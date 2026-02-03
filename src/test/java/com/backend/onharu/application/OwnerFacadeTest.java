@@ -203,7 +203,7 @@ class OwnerFacadeTest {
             Store store2 = createTestStore("테스트 가게2", owner, category); // 가게2 생성
 
             // when
-            List<Store> stores = ownerFacade.getMyStores(owner.getId()); // 사업자의 가게 목록 조회
+            List<Store> stores = ownerFacade.getMyStores(); // 사업자의 가게 목록 조회
 
             // then
             assertThat(stores).isNotNull();
@@ -225,7 +225,7 @@ class OwnerFacadeTest {
             Owner owner = createTestOwner("test_owner_empty_stores", "테스트 사업자", "01012345678", "새싹", "1234567890");
 
             // when
-            List<Store> stores = ownerFacade.getMyStores(owner.getId());
+            List<Store> stores = ownerFacade.getMyStores();
 
             // then
             assertThat(stores).isNotNull();
@@ -270,7 +270,7 @@ class OwnerFacadeTest {
             );
 
             // when
-            List<Reservation> bookings = ownerFacade.getStoreBookings(owner.getId(), store.getId());
+            List<Reservation> bookings = ownerFacade.getStoreBookings(store.getId());
 
             // then
             assertThat(bookings).isNotNull();
@@ -317,7 +317,7 @@ class OwnerFacadeTest {
             // when & then
             CoreException exception = Assertions.assertThrows(
                 CoreException.class,
-                () -> ownerFacade.getStoreBookings(owner2.getId(), store.getId())
+                () -> ownerFacade.getStoreBookings(store.getId())
             );
             
             assertThat(exception.getErrorType()).isEqualTo(STORE_OWNER_MISMATCH);
@@ -399,7 +399,7 @@ class OwnerFacadeTest {
             );
 
             // when
-            ownerFacade.setAvailableDates(store.getId(), owner.getId(), request);
+            ownerFacade.setAvailableDates(store.getId(), request);
 
             // then
             List<StoreSchedule> schedules = storeScheduleJpaRepository.findByStoreId(store.getId());
@@ -441,7 +441,7 @@ class OwnerFacadeTest {
             // when & then
             CoreException exception = Assertions.assertThrows(
                 CoreException.class,
-                () -> ownerFacade.setAvailableDates(store.getId(), owner2.getId(), request)
+                () -> ownerFacade.setAvailableDates(store.getId(), request)
             );
             
             assertThat(exception.getErrorType()).isEqualTo(STORE_OWNER_MISMATCH);
@@ -471,7 +471,7 @@ class OwnerFacadeTest {
             );
 
             // when
-            ownerFacade.removeAvailableDates(store.getId(), owner.getId(), request);
+            ownerFacade.removeAvailableDates(store.getId(), request);
 
             // then
             List<StoreSchedule> remainingSchedules = storeScheduleJpaRepository.findByStoreId(store.getId());
@@ -504,7 +504,7 @@ class OwnerFacadeTest {
             // when & then
             CoreException exception = Assertions.assertThrows(
                 CoreException.class,
-                () -> ownerFacade.removeAvailableDates(store.getId(), owner2.getId(), request)
+                () -> ownerFacade.removeAvailableDates(store.getId(), request)
             );
             
             assertThat(exception.getErrorType()).isEqualTo(STORE_OWNER_MISMATCH);
