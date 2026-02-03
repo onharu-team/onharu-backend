@@ -29,11 +29,10 @@ class ReservationCommandTest {
 
             // when
             CreateReservationCommand command = new CreateReservationCommand(
-                childId, storeScheduleId, people
+                storeScheduleId, people
             );
 
             // then
-            assertThat(command.childId()).isEqualTo(childId);
             assertThat(command.storeScheduleId()).isEqualTo(storeScheduleId);
             assertThat(command.people()).isEqualTo(people);
         }
