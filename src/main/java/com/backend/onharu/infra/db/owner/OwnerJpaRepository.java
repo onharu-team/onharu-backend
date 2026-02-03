@@ -17,4 +17,12 @@ public interface OwnerJpaRepository extends JpaRepository<Owner, Long> {
      * @return Owner (없으면 Optional.empty())
      */
     Optional<Owner> findByUser_LoginId(String loginId);
+
+    /**
+     * 사용자 ID (UserId) 로 Owner 조회
+     *
+     * @param userId 사용자 ID
+     * @return Owner (없으면 Optional.empty())
+     */
+    Optional<Owner> findByUser_Id(Long userId);
 }
