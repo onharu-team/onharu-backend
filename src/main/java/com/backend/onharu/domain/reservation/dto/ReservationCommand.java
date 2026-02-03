@@ -7,14 +7,10 @@ public class ReservationCommand {
      * 예약 생성 커맨드
      */
     public record CreateReservationCommand(
-            Long childId,
             Long storeScheduleId,
             Integer people
     ) {
         public CreateReservationCommand {
-            // if (childId == null) {
-            //     throw new CoreException(BAD_REQUEST);
-            // }
             // if (storeScheduleId == null) {
             //     throw new CoreException(BAD_REQUEST);
             // }
