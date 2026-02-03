@@ -1,5 +1,6 @@
 package com.backend.onharu.domain.child.repository;
 
+import com.backend.onharu.domain.child.dto.ChildRepositoryParam.GetChildByUserIdParam;
 import com.backend.onharu.domain.child.dto.ChildRepositoryParam.GetChildByIdParam;
 import com.backend.onharu.domain.child.dto.ChildRepositoryParam.GetChildByLoginIdParam;
 import com.backend.onharu.domain.child.model.Child;
@@ -32,4 +33,12 @@ public interface ChildRepository {
      * @return 조회된 아동 엔티티
      */
     Child getChildByLoginId(GetChildByLoginIdParam param);
+
+    /**
+     * 사용자 ID로 아동을 조회합니다.
+     *
+     * @param param 사용자 ID를 포함한 파라미터
+     * @return 조회된 아동 엔티티
+     */
+    Child getChildByUserId(GetChildByUserIdParam param);
 }

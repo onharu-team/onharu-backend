@@ -19,4 +19,12 @@ public class ChildRepositoryParam {
             String loginId
     ) {
     }
+
+    /**
+     * 사용자 ID 로 조회하는 파라미터
+     */
+    public record GetChildByUserIdParam(
+            Long userId
+    ) {
+    }
 }

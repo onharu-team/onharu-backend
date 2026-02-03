@@ -1,5 +1,6 @@
 package com.backend.onharu.infra.db.child.impl;
 
+import com.backend.onharu.domain.child.dto.ChildRepositoryParam;
 import org.springframework.stereotype.Repository;
 
 import com.backend.onharu.domain.child.dto.ChildRepositoryParam.GetChildByIdParam;
@@ -35,6 +36,12 @@ public class ChildRepositoryImpl implements ChildRepository {
     @Override
     public Child getChildByLoginId(GetChildByLoginIdParam param) {
         return childJpaRepository.findByUser_LoginId(param.loginId())
+                .orElseThrow(() -> new CoreException(ErrorType.Child.CHILD_NOT_FOUND));
+    }
+
+    @Override
+    public Child getChildByUserId(ChildRepositoryParam.GetChildByUserIdParam param) {
+        return childJpaRepository.findByUser_Id(param.userId())
                 .orElseThrow(() -> new CoreException(ErrorType.Child.CHILD_NOT_FOUND));
     }
 }
