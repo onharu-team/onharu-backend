@@ -20,4 +20,12 @@ public class ChildQuery {
             String loginId
     ) {
     }
+
+    /**
+     * 사용자 ID로 아동 조회 Query
+     */
+    public record GetChildByUserIdQuery(
+            Long userId
+    ) {
+    }
 }
