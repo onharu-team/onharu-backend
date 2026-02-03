@@ -20,4 +20,9 @@ public class OwnerQuery {
             String loginId
     ) {
     }
+
+    public record GetOwnerByUserIdQuery(
+            Long userId
+    ) {
+    }
 }

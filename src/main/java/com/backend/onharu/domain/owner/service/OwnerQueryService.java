@@ -4,8 +4,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.backend.onharu.domain.owner.dto.OwnerQuery.GetOwnerByIdQuery;
+import com.backend.onharu.domain.owner.dto.OwnerQuery.GetOwnerByUserIdQuery;
 import com.backend.onharu.domain.owner.dto.OwnerQuery.GetOwnerByLoginIdQuery;
 import com.backend.onharu.domain.owner.dto.OwnerRepositoryParam.GetOwnerByLoginIdParam;
+import com.backend.onharu.domain.owner.dto.OwnerRepositoryParam.GetOwnerByUserIdParam;
 import com.backend.onharu.domain.owner.model.Owner;
 import com.backend.onharu.domain.owner.repository.OwnerRepository;
 import com.backend.onharu.domain.owner.service.OwnerRepositoryParam.GetOwnerByIdParam;
@@ -43,5 +45,15 @@ public class OwnerQueryService {
      */
     public Owner getOwnerByLoginId(GetOwnerByLoginIdQuery query) {
         return ownerRepository.getOwnerByLoginId(new GetOwnerByLoginIdParam(query.loginId()));
+    }
+
+    /**
+     * 사용자 ID(UserId) 로 사업자를 조회합니다.
+     *
+     * @param query 사용자 ID를 포함한 Query
+     * @return 조회된 사업자 엔티티
+     */
+    public Owner getOwnerByUserId(GetOwnerByUserIdQuery query) {
+        return ownerRepository.getOwnerByUserId(new GetOwnerByUserIdParam(query.userId()));
     }
 }
